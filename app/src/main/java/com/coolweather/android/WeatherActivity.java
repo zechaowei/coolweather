@@ -50,10 +50,10 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= 21){
+        if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         setContentView(R.layout.activity_weather);
@@ -104,7 +104,7 @@ public class WeatherActivity extends AppCompatActivity {
                 requestWeather(weatherId);
             }
         });
-        String bingPic = prefs.getString("bing_pic",null);
+        String bingPic = prefs.getString("bing_pic", null);
         Glide.with(this).load(R.drawable.bing_pic_img).into(bingPicImg);
 //        if (bingPic != null){
 //            Glide.with(this).load(R.drawable.bing_pic_img).into(bingPicImg);
@@ -122,16 +122,11 @@ public class WeatherActivity extends AppCompatActivity {
         String requestBingPic = "http://guolin.tech/api/bing_pic";  //api失效
         HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 final String bingPic = response.body().string();
                 SharedPreferences.Editor editor =
                         PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                editor.putString("bing_pic",bingPic);
+                editor.putString("bing_pic", bingPic);
                 editor.apply();
                 runOnUiThread(new Runnable() {
                     @Override
@@ -139,6 +134,11 @@ public class WeatherActivity extends AppCompatActivity {
                         Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
                     }
                 });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -150,17 +150,6 @@ public class WeatherActivity extends AppCompatActivity {
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" +
                 weatherId + "&key=a65d446113d145719415dda024d8e6e3";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
-                        swipeRefresh.setRefreshing(false);
-                    }
-                });
-            }
-
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 final String responseText = response.body().string();
@@ -177,6 +166,17 @@ public class WeatherActivity extends AppCompatActivity {
                         } else {
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh.setRefreshing(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         swipeRefresh.setRefreshing(false);
                     }
                 });
@@ -223,5 +223,7 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+//        Intent intent = new Intent(this, AutoUpdateService.class);
+//        startActivity(intent);
     }
 }
